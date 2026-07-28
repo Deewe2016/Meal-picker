@@ -10,7 +10,7 @@
 
   <div class="card">
     <h1>🍽️ Meal Picker</h1>
-    <p class="subtitle">Filter by city & let code decide!</p>
+    <p class="subtitle">Filter by city & today's schedule!</p>
 
     <div class="result-box">
       <h2 id="winner">Press the button!</h2>
@@ -24,7 +24,7 @@
     </div>
 
     <div class="section">
-      <h3>Add a New City/Category:</h3>
+      <h3>Add a New City:</h3>
       <div class="input-container">
         <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
         <button onclick="addCategory()">Add City</button>
@@ -36,6 +36,18 @@
       <div class="input-container flex-column">
         <input type="text" id="restaurantInput" placeholder="Restaurant name...">
         <select id="categorySelect"></select>
+        
+        <label class="day-label">Open Days:</label>
+        <div class="days-group">
+          <label><input type="checkbox" value="Sun" class="day-input" checked> Sun</label>
+          <label><input type="checkbox" value="Mon" class="day-input" checked> Mon</label>
+          <label><input type="checkbox" value="Tue" class="day-input" checked> Tue</label>
+          <label><input type="checkbox" value="Wed" class="day-input" checked> Wed</label>
+          <label><input type="checkbox" value="Thu" class="day-input" checked> Thu</label>
+          <label><input type="checkbox" value="Fri" class="day-input" checked> Fri</label>
+          <label><input type="checkbox" value="Sat" class="day-input" checked> Sat</label>
+        </div>
+
         <button onclick="addRestaurant()">Add Restaurant</button>
       </div>
     </div>
