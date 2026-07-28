@@ -1,4 +1,3 @@
-// Days map helper
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // Default categories
@@ -6,12 +5,15 @@ let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
   "Cupertino", "Santa Clara", "Mountain View", "San Jose"
 ];
 
-// Default restaurants with assigned categories and open days
+// Default restaurants with price and days
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
-  { name: "Tacos El Gordo", category: "San Jose", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "In-N-Out", category: "Santa Clara", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "Ramen Nagi", category: "Cupertino", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+  { name: "Tacos El Gordo", category: "San Jose", price: "$", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "In-N-Out", category: "Santa Clara", price: "$", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "Ramen Nagi", category: "Cupertino", price: "$$", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
 ];
+
+// Track last picked winner from LocalStorage
+let lastWinner = localStorage.getItem('lastMealWinner') || "";
 
 // Initial Render
 renderCategories();
@@ -52,6 +54,7 @@ function renderList() {
     li.innerHTML = `
       <div>
         <strong>${item.name}</strong>
+        <span class="tag price-tag">${item.price || "$$"}</span>
         <span class="tag">${item.category}</span>
       </div>
       <span class="delete-btn" onclick="removeRestaurant(${index})">✕</span>
@@ -83,16 +86,18 @@ function removeCategory(index) {
 
 function addRestaurant() {
   const input = document.getElementById('restaurantInput');
-  const select = document.getElementById('categorySelect');
+  const categorySelect = document.getElementById('categorySelect');
+  const priceSelect = document.getElementById('priceSelect');
+  
   const name = input.value.trim();
-  const category = select.value;
+  const category = categorySelect.value;
+  const price = priceSelect.value;
 
-  // Get selected open days
   const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
                             .map(cb => cb.value);
 
   if (name !== "" && category !== "" && selectedDays.length > 0) {
-    restaurants.push({ name: name, category: category, days: selectedDays });
+    restaurants.push({ name: name, category: category, price: price, days: selectedDays });
     input.value = "";
     renderList();
   }
@@ -104,12 +109,15 @@ function removeRestaurant(index) {
 }
 
 function pickRestaurant() {
-  // 1. Get today's day string (e.g., "Mon", "Tue")
   const todayIndex = new Date().getDay();
   const todayName = dayNames[todayIndex];
 
-  // 2. Find which city checkboxes are currently checked
+  // Get checked cities
   const checkedCities = Array.from(document.querySelectorAll('.city-filter:checked'))
+                            .map(cb => cb.value);
+
+  // Get checked price ranges
+  const checkedPrices = Array.from(document.querySelectorAll('.price-filter:checked'))
                             .map(cb => cb.value);
 
   if (checkedCities.length === 0) {
@@ -117,20 +125,30 @@ function pickRestaurant() {
     return;
   }
 
-  // 3. Filter pool by city AND check if open today!
-  const filteredPool = restaurants.filter(item => {
-    const matchesCity = checkedCities.includes(item.category);
-    // If old items don't have days array yet, default to open
-    const isOpenToday = item.days ? item.days.includes(todayName) : true; 
-    return matchesCity && isOpenToday;
-  });
-
-  if (filteredPool.length === 0) {
-    document.getElementById('winner').textContent = `No places open on ${todayName} in selected cities!`;
+  if (checkedPrices.length === 0) {
+    document.getElementById('winner').textContent = "Select at least 1 price tag!";
     return;
   }
 
-  // 4. Spin animation
+  // Filter pool by city, price, and open days!
+  let filteredPool = restaurants.filter(item => {
+    const matchesCity = checkedCities.includes(item.category);
+    const matchesPrice = checkedPrices.includes(item.price || "$$");
+    const isOpenToday = item.days ? item.days.includes(todayName) : true; 
+    return matchesCity && matchesPrice && isOpenToday;
+  });
+
+  if (filteredPool.length === 0) {
+    document.getElementById('winner').textContent = `No matching places open on ${todayName}!`;
+    return;
+  }
+
+  // SMART MEMORY: If we have more than 1 option, temporarily remove the last winner so we don't repeat!
+  if (filteredPool.length > 1 && lastWinner !== "") {
+    filteredPool = filteredPool.filter(item => item.name !== lastWinner);
+  }
+
+  // Spin animation
   const winnerDisplay = document.getElementById('winner');
   let counter = 0;
 
@@ -142,7 +160,12 @@ function pickRestaurant() {
     if (counter > 15) {
       clearInterval(spinInterval);
       const finalWinner = filteredPool[Math.floor(Math.random() * filteredPool.length)];
-      winnerDisplay.textContent = `🎉 ${finalWinner.name} (${finalWinner.category})!`;
+      
+      // Save this winner so it doesn't get picked next time!
+      lastWinner = finalWinner.name;
+      localStorage.setItem('lastMealWinner', lastWinner);
+
+      winnerDisplay.textContent = `🎉 ${finalWinner.name} (${finalWinner.price}, ${finalWinner.category})!`;
     }
   }, 100);
 }
