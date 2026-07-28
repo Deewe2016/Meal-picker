@@ -102,6 +102,27 @@ input, select {
   font-size: 0.9rem;
 }
 
+.day-label {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-top: 5px;
+}
+
+.days-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.days-group label {
+  background: #1a1a1a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 button {
   padding: 10px 15px;
   border-radius: 6px;
