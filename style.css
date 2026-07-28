@@ -1,171 +1,90 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meal Picker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-body {
-  background-color: #121212;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-}
+  <div class="card">
+    <header class="app-header">
+      <h1>🍽️ Meal Picker</h1>
+      <p class="subtitle">Smart dinner decider for the family!</p>
+    </header>
 
-.card {
-  background-color: #1e1e1e;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  width: 100%;
-  max-width: 480px;
-  text-align: center;
-}
+    <div class="grid-container">
+      
+      <div class="column">
+        <div class="result-box">
+          <h2 id="winner">Press the button!</h2>
+        </div>
 
-h1 { font-size: 1.8rem; margin-bottom: 5px; }
-.subtitle { color: #aaa; font-size: 0.9rem; margin-bottom: 20px; }
+        <button id="spinBtn" onclick="pickRestaurant()">Pick For Us!</button>
 
-.result-box {
-  background-color: #2a2a2a;
-  border: 2px solid #ff5722;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+        <div class="section">
+          <h3>1. Select Cities:</h3>
+          <div id="filterCheckboxes" class="checkbox-group"></div>
+        </div>
 
-#winner { color: #ff5722; font-size: 1.4rem; }
+        <div class="section">
+          <h3>2. Select Price Range:</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" value="$" class="price-filter" checked> $ (Cheap)</label>
+            <label class="checkbox-label"><input type="checkbox" value="$$" class="price-filter" checked> $$ (Moderate)</label>
+            <label class="checkbox-label"><input type="checkbox" value="$$$" class="price-filter" checked> $$$ (Fancy)</label>
+          </div>
+        </div>
+      </div>
 
-#spinBtn {
-  width: 100%;
-  padding: 14px;
-  font-size: 1.2rem;
-  background-color: #ff5722;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
+      <div class="column">
+        <div class="section">
+          <h3>Add a New City:</h3>
+          <div class="input-container">
+            <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
+            <button onclick="addCategory()">Add City</button>
+          </div>
+        </div>
 
-#spinBtn:hover { background-color: #e64a19; }
+        <div class="section">
+          <h3>Add a Restaurant:</h3>
+          <div class="input-container flex-column">
+            <input type="text" id="restaurantInput" placeholder="Restaurant name...">
+            
+            <div class="row-group">
+              <select id="categorySelect"></select>
+              <select id="priceSelect">
+                <option value="$">$ (Cheap Eats)</option>
+                <option value="$$" selected>$$ (Sit-Down)</option>
+                <option value="$$$">$$$ (Fancy)</option>
+              </select>
+            </div>
 
-.section {
-  text-align: left;
-  margin-bottom: 20px;
-  background-color: #262626;
-  padding: 15px;
-  border-radius: 10px;
-}
+            <label class="day-label">Open Days:</label>
+            <div class="days-group">
+              <label><input type="checkbox" value="Sun" class="day-input" checked> Sun</label>
+              <label><input type="checkbox" value="Mon" class="day-input" checked> Mon</label>
+              <label><input type="checkbox" value="Tue" class="day-input" checked> Tue</label>
+              <label><input type="checkbox" value="Wed" class="day-input" checked> Wed</label>
+              <label><input type="checkbox" value="Thu" class="day-input" checked> Thu</label>
+              <label><input type="checkbox" value="Fri" class="day-input" checked> Fri</label>
+              <label><input type="checkbox" value="Sat" class="day-input" checked> Sat</label>
+            </div>
 
-h3 { font-size: 0.95rem; margin-bottom: 10px; color: #00adb5; }
+            <button onclick="addRestaurant()">Add Restaurant</button>
+          </div>
+        </div>
 
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+        <div class="section">
+          <h3>Your Restaurant Pool:</h3>
+          <ul id="restaurantList"></ul>
+        </div>
+      </div>
 
-.checkbox-label {
-  background: #333;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    </div>
+  </div>
 
-.input-container {
-  display: flex;
-  gap: 8px;
-}
-
-.flex-column {
-  flex-direction: column;
-}
-
-.row-group {
-  display: flex;
-  gap: 8px;
-}
-
-.row-group select {
-  flex: 1;
-}
-
-input, select {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background-color: #1a1a1a;
-  color: white;
-  font-size: 0.9rem;
-}
-
-.day-label {
-  font-size: 0.85rem;
-  color: #bbb;
-  margin-top: 5px;
-}
-
-.days-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.8rem;
-  margin-bottom: 10px;
-}
-
-.days-group label {
-  background: #1a1a1a;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button {
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: none;
-  background-color: #00adb5;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-ul { list-style: none; }
-
-li {
-  background-color: #1a1a1a;
-  padding: 10px 12px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.tag {
-  background-color: #333;
-  color: #ffb74d;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  margin-left: 4px;
-}
-
-.price-tag {
-  color: #81c784;
-}
-
-.delete-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+  <script src="script.js"></script>
+</body>
+</html>
