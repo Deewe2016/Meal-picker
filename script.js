@@ -5,14 +5,13 @@ let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
   "Cupertino", "Santa Clara", "Mountain View", "San Jose"
 ];
 
-// Default restaurants with price and days
+// Default restaurants with cuisine, price, and days
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
-  { name: "Tacos El Gordo", category: "San Jose", price: "$", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "In-N-Out", category: "Santa Clara", price: "$", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "Ramen Nagi", category: "Cupertino", price: "$$", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+  { name: "Tacos El Gordo", category: "San Jose", price: "$", cuisine: "Mexican", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "In-N-Out", category: "Santa Clara", price: "$", cuisine: "American", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "Ramen Nagi", category: "Cupertino", price: "$$", cuisine: "Asian", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
 ];
 
-// Track last picked winner from LocalStorage
 let lastWinner = localStorage.getItem('lastMealWinner') || "";
 
 // Initial Render
@@ -55,6 +54,7 @@ function renderList() {
       <div>
         <strong>${item.name}</strong>
         <span class="tag price-tag">${item.price || "$$"}</span>
+        <span class="tag">${item.cuisine || "Other"}</span>
         <span class="tag">${item.category}</span>
       </div>
       <span class="delete-btn" onclick="removeRestaurant(${index})">✕</span>
@@ -88,16 +88,18 @@ function addRestaurant() {
   const input = document.getElementById('restaurantInput');
   const categorySelect = document.getElementById('categorySelect');
   const priceSelect = document.getElementById('priceSelect');
+  const cuisineSelect = document.getElementById('cuisineSelect');
   
   const name = input.value.trim();
   const category = categorySelect.value;
   const price = priceSelect.value;
+  const cuisine = cuisineSelect.value;
 
   const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
                             .map(cb => cb.value);
 
   if (name !== "" && category !== "" && selectedDays.length > 0) {
-    restaurants.push({ name: name, category: category, price: price, days: selectedDays });
+    restaurants.push({ name: name, category: category, price: price, cuisine: cuisine, days: selectedDays });
     input.value = "";
     renderList();
   }
@@ -112,30 +114,21 @@ function pickRestaurant() {
   const todayIndex = new Date().getDay();
   const todayName = dayNames[todayIndex];
 
-  // Get checked cities
-  const checkedCities = Array.from(document.querySelectorAll('.city-filter:checked'))
-                            .map(cb => cb.value);
+  const checkedCities = Array.from(document.querySelectorAll('.city-filter:checked')).map(cb => cb.value);
+  const checkedPrices = Array.from(document.querySelectorAll('.price-filter:checked')).map(cb => cb.value);
+  const checkedCuisines = Array.from(document.querySelectorAll('.cuisine-filter:checked')).map(cb => cb.value);
 
-  // Get checked price ranges
-  const checkedPrices = Array.from(document.querySelectorAll('.price-filter:checked'))
-                            .map(cb => cb.value);
-
-  if (checkedCities.length === 0) {
-    document.getElementById('winner').textContent = "Select at least 1 city!";
+  if (checkedCities.length === 0 || checkedPrices.length === 0 || checkedCuisines.length === 0) {
+    document.getElementById('winner').textContent = "Select at least 1 city, price, and cuisine!";
     return;
   }
 
-  if (checkedPrices.length === 0) {
-    document.getElementById('winner').textContent = "Select at least 1 price tag!";
-    return;
-  }
-
-  // Filter pool by city, price, and open days!
   let filteredPool = restaurants.filter(item => {
     const matchesCity = checkedCities.includes(item.category);
     const matchesPrice = checkedPrices.includes(item.price || "$$");
+    const matchesCuisine = checkedCuisines.includes(item.cuisine || "Other");
     const isOpenToday = item.days ? item.days.includes(todayName) : true; 
-    return matchesCity && matchesPrice && isOpenToday;
+    return matchesCity && matchesPrice && matchesCuisine && isOpenToday;
   });
 
   if (filteredPool.length === 0) {
@@ -143,12 +136,10 @@ function pickRestaurant() {
     return;
   }
 
-  // SMART MEMORY: If we have more than 1 option, temporarily remove the last winner so we don't repeat!
   if (filteredPool.length > 1 && lastWinner !== "") {
     filteredPool = filteredPool.filter(item => item.name !== lastWinner);
   }
 
-  // Spin animation
   const winnerDisplay = document.getElementById('winner');
   let counter = 0;
 
@@ -161,11 +152,48 @@ function pickRestaurant() {
       clearInterval(spinInterval);
       const finalWinner = filteredPool[Math.floor(Math.random() * filteredPool.length)];
       
-      // Save this winner so it doesn't get picked next time!
       lastWinner = finalWinner.name;
       localStorage.setItem('lastMealWinner', lastWinner);
 
       winnerDisplay.textContent = `🎉 ${finalWinner.name} (${finalWinner.price}, ${finalWinner.category})!`;
     }
   }, 100);
+}
+
+// 📲 SHARE / EXPORT FUNCTIONALITY
+function exportData() {
+  const package = {
+    categories: categories,
+    restaurants: restaurants
+  };
+  // Converts all data to a single text string
+  const encodedData = btoa(JSON.stringify(package));
+  
+  navigator.clipboard.writeText(encodedData);
+  alert("Family Share Code copied to clipboard! Text it to your parents!");
+}
+
+// 📲 IMPORT FUNCTIONALITY
+function importData() {
+  const input = document.getElementById('importInput').value.trim();
+  if (!input) {
+    alert("Please paste a Share Code first!");
+    return;
+  }
+
+  try {
+    const decodedData = JSON.parse(atob(input));
+    if (decodedData.categories && decodedData.restaurants) {
+      categories = decodedData.categories;
+      restaurants = decodedData.restaurants;
+      
+      renderCategories();
+      renderList();
+      
+      document.getElementById('importInput').value = "";
+      alert("Restaurant list updated successfully!");
+    }
+  } catch (e) {
+    alert("Invalid Share Code! Make sure you copied the exact code.");
+  }
 }
