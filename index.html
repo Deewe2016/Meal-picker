@@ -36,6 +36,17 @@
             <label class="checkbox-label"><input type="checkbox" value="$$$" class="price-filter" checked> $$$ (Fancy)</label>
           </div>
         </div>
+
+        <div class="section">
+          <h3>3. Select Cuisine Types:</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" value="Mexican" class="cuisine-filter" checked> 🌮 Mexican</label>
+            <label class="checkbox-label"><input type="checkbox" value="Asian" class="cuisine-filter" checked> 🍜 Asian</label>
+            <label class="checkbox-label"><input type="checkbox" value="American" class="cuisine-filter" checked> 🍔 American</label>
+            <label class="checkbox-label"><input type="checkbox" value="Italian" class="cuisine-filter" checked> 🍕 Italian</label>
+            <label class="checkbox-label"><input type="checkbox" value="Other" class="cuisine-filter" checked> 🥗 Other</label>
+          </div>
+        </div>
       </div>
 
       <div class="column">
@@ -59,6 +70,13 @@
                 <option value="$$" selected>$$ (Sit-Down)</option>
                 <option value="$$$">$$$ (Fancy)</option>
               </select>
+              <select id="cuisineSelect">
+                <option value="Mexican">🌮 Mexican</option>
+                <option value="Asian">🍜 Asian</option>
+                <option value="American" selected>🍔 American</option>
+                <option value="Italian">🍕 Italian</option>
+                <option value="Other">🥗 Other</option>
+              </select>
             </div>
 
             <label class="day-label">Open Days:</label>
@@ -73,6 +91,15 @@
             </div>
 
             <button onclick="addRestaurant()">Add Restaurant</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>📲 Sync / Share with Family:</h3>
+          <div class="input-container flex-column">
+            <button onclick="exportData()" style="background-color: #4caf50;">Copy Share Code</button>
+            <input type="text" id="importInput" placeholder="Paste family share code here...">
+            <button onclick="importData()" style="background-color: #ff9800;">Import Family List</button>
           </div>
         </div>
 
