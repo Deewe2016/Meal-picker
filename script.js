@@ -7,7 +7,7 @@ let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
   { name: "Tacos El Gordo", category: "San Jose" },
   { name: "In-N-Out", category: "Santa Clara" },
-  { name: "Ramen Nagi", category: "Palo Alto" }
+  { name: "Ramen Nagi", category: "Cupertino" }
 ];
 
 // Initial Render
@@ -22,13 +22,14 @@ function renderCategories() {
   checkboxContainer.innerHTML = '';
   selectDropdown.innerHTML = '';
 
-  categories.forEach((cat) => {
-    // 1. Build Filter Checkboxes
+  categories.forEach((cat, index) => {
+    // 1. Build Filter Checkboxes with a Delete (✕) Button
     const label = document.createElement('label');
     label.className = 'checkbox-label';
     label.innerHTML = `
       <input type="checkbox" value="${cat}" class="city-filter" checked>
       ${cat}
+      <span class="delete-btn" onclick="removeCategory(${index})" title="Delete City">✕</span>
     `;
     checkboxContainer.appendChild(label);
 
@@ -72,6 +73,21 @@ function addCategory() {
     input.value = "";
     renderCategories();
   }
+}
+
+// NEW: Delete a category/city
+function removeCategory(index) {
+  const categoryToRemove = categories[index];
+  
+  // Remove the category from the categories array
+  categories.splice(index, 1);
+  
+  // Also remove any restaurants associated with this deleted city
+  restaurants = restaurants.filter(item => item.category !== categoryToRemove);
+  
+  // Re-render the categories and restaurant list
+  renderCategories();
+  renderList();
 }
 
 // Add a restaurant assigned to selected category
