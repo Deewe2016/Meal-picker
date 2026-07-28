@@ -9,69 +9,79 @@
 <body>
 
   <div class="card">
-    <h1>🍽️ Meal Picker</h1>
-    <p class="subtitle">Smart dinner decider for the family!</p>
+    <header class="app-header">
+      <h1>🍽️ Meal Picker</h1>
+      <p class="subtitle">Smart dinner decider for the family!</p>
+    </header>
 
-    <div class="result-box">
-      <h2 id="winner">Press the button!</h2>
-    </div>
-
-    <button id="spinBtn" onclick="pickRestaurant()">Pick For Us!</button>
-
-    <div class="section">
-      <h3>1. Select Cities:</h3>
-      <div id="filterCheckboxes" class="checkbox-group"></div>
-    </div>
-
-    <div class="section">
-      <h3>2. Select Price Range:</h3>
-      <div class="checkbox-group">
-        <label class="checkbox-label"><input type="checkbox" value="$" class="price-filter" checked> $ (Cheap)</label>
-        <label class="checkbox-label"><input type="checkbox" value="$$" class="price-filter" checked> $$ (Moderate)</label>
-        <label class="checkbox-label"><input type="checkbox" value="$$$" class="price-filter" checked> $$$ (Fancy)</label>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Add a New City:</h3>
-      <div class="input-container">
-        <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
-        <button onclick="addCategory()">Add City</button>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Add a Restaurant:</h3>
-      <div class="input-container flex-column">
-        <input type="text" id="restaurantInput" placeholder="Restaurant name...">
-        
-        <div class="row-group">
-          <select id="categorySelect"></select>
-          <select id="priceSelect">
-            <option value="$">$ (Cheap Eats)</option>
-            <option value="$$" selected>$$ (Sit-Down)</option>
-            <option value="$$$">$$$ (Fancy)</option>
-          </select>
+    <div class="grid-container">
+      
+      <div class="column">
+        <div class="result-box">
+          <h2 id="winner">Press the button!</h2>
         </div>
 
-        <label class="day-label">Open Days:</label>
-        <div class="days-group">
-          <label><input type="checkbox" value="Sun" class="day-input" checked> Sun</label>
-          <label><input type="checkbox" value="Mon" class="day-input" checked> Mon</label>
-          <label><input type="checkbox" value="Tue" class="day-input" checked> Tue</label>
-          <label><input type="checkbox" value="Wed" class="day-input" checked> Wed</label>
-          <label><input type="checkbox" value="Thu" class="day-input" checked> Thu</label>
-          <label><input type="checkbox" value="Fri" class="day-input" checked> Fri</label>
-          <label><input type="checkbox" value="Sat" class="day-input" checked> Sat</label>
+        <button id="spinBtn" onclick="pickRestaurant()">Pick For Us!</button>
+
+        <div class="section">
+          <h3>1. Select Cities:</h3>
+          <div id="filterCheckboxes" class="checkbox-group"></div>
         </div>
 
-        <button onclick="addRestaurant()">Add Restaurant</button>
+        <div class="section">
+          <h3>2. Select Price Range:</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" value="$" class="price-filter" checked> $ (Cheap)</label>
+            <label class="checkbox-label"><input type="checkbox" value="$$" class="price-filter" checked> $$ (Moderate)</label>
+            <label class="checkbox-label"><input type="checkbox" value="$$$" class="price-filter" checked> $$$ (Fancy)</label>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="section">
-      <h3>Your Restaurant Pool:</h3>
-      <ul id="restaurantList"></ul>
+      <div class="column">
+        <div class="section">
+          <h3>Add a New City:</h3>
+          <div class="input-container">
+            <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
+            <button onclick="addCategory()">Add City</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Add a Restaurant:</h3>
+          <div class="input-container flex-column">
+            <input type="text" id="restaurantInput" placeholder="Restaurant name...">
+            
+            <div class="row-group">
+              <select id="categorySelect"></select>
+              <select id="priceSelect">
+                <option value="$">$ (Cheap Eats)</option>
+                <option value="$$" selected>$$ (Sit-Down)</option>
+                <option value="$$$">$$$ (Fancy)</option>
+              </select>
+            </div>
+
+            <label class="day-label">Open Days:</label>
+            <div class="days-group">
+              <label><input type="checkbox" value="Sun" class="day-input" checked> Sun</label>
+              <label><input type="checkbox" value="Mon" class="day-input" checked> Mon</label>
+              <label><input type="checkbox" value="Tue" class="day-input" checked> Tue</label>
+              <label><input type="checkbox" value="Wed" class="day-input" checked> Wed</label>
+              <label><input type="checkbox" value="Thu" class="day-input" checked> Thu</label>
+              <label><input type="checkbox" value="Fri" class="day-input" checked> Fri</label>
+              <label><input type="checkbox" value="Sat" class="day-input" checked> Sat</label>
+            </div>
+
+            <button onclick="addRestaurant()">Add Restaurant</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Your Restaurant Pool:</h3>
+          <ul id="restaurantList"></ul>
+        </div>
+      </div>
+
     </div>
   </div>
 
