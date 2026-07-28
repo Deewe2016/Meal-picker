@@ -39,13 +39,7 @@
 
         <div class="section">
           <h3>3. Select Cuisine Types:</h3>
-          <div class="checkbox-group">
-            <label class="checkbox-label"><input type="checkbox" value="Mexican" class="cuisine-filter" checked> 🌮 Mexican</label>
-            <label class="checkbox-label"><input type="checkbox" value="Asian" class="cuisine-filter" checked> 🍜 Asian</label>
-            <label class="checkbox-label"><input type="checkbox" value="American" class="cuisine-filter" checked> 🍔 American</label>
-            <label class="checkbox-label"><input type="checkbox" value="Italian" class="cuisine-filter" checked> 🍕 Italian</label>
-            <label class="checkbox-label"><input type="checkbox" value="Other" class="cuisine-filter" checked> 🥗 Other</label>
-          </div>
+          <div id="cuisineCheckboxes" class="checkbox-group"></div>
         </div>
       </div>
 
@@ -55,6 +49,14 @@
           <div class="input-container">
             <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
             <button onclick="addCategory()">Add City</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Add a New Cuisine:</h3>
+          <div class="input-container">
+            <input type="text" id="newCuisineInput" placeholder="New cuisine (e.g., Boba)">
+            <button onclick="addCuisine()">Add Cuisine</button>
           </div>
         </div>
 
@@ -70,13 +72,7 @@
                 <option value="$$" selected>$$ (Sit-Down)</option>
                 <option value="$$$">$$$ (Fancy)</option>
               </select>
-              <select id="cuisineSelect">
-                <option value="Mexican">🌮 Mexican</option>
-                <option value="Asian">🍜 Asian</option>
-                <option value="American" selected>🍔 American</option>
-                <option value="Italian">🍕 Italian</option>
-                <option value="Other">🥗 Other</option>
-              </select>
+              <select id="cuisineSelect"></select>
             </div>
 
             <label class="day-label">Open Days:</label>
