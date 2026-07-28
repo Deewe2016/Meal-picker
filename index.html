@@ -10,7 +10,7 @@
 
   <div class="card">
     <h1>🍽️ Meal Picker</h1>
-    <p class="subtitle">Filter by city & today's schedule!</p>
+    <p class="subtitle">Smart dinner decider for the family!</p>
 
     <div class="result-box">
       <h2 id="winner">Press the button!</h2>
@@ -19,8 +19,17 @@
     <button id="spinBtn" onclick="pickRestaurant()">Pick For Us!</button>
 
     <div class="section">
-      <h3>1. Select Cities to Include:</h3>
+      <h3>1. Select Cities:</h3>
       <div id="filterCheckboxes" class="checkbox-group"></div>
+    </div>
+
+    <div class="section">
+      <h3>2. Select Price Range:</h3>
+      <div class="checkbox-group">
+        <label class="checkbox-label"><input type="checkbox" value="$" class="price-filter" checked> $ (Cheap)</label>
+        <label class="checkbox-label"><input type="checkbox" value="$$" class="price-filter" checked> $$ (Moderate)</label>
+        <label class="checkbox-label"><input type="checkbox" value="$$$" class="price-filter" checked> $$$ (Fancy)</label>
+      </div>
     </div>
 
     <div class="section">
@@ -35,8 +44,16 @@
       <h3>Add a Restaurant:</h3>
       <div class="input-container flex-column">
         <input type="text" id="restaurantInput" placeholder="Restaurant name...">
-        <select id="categorySelect"></select>
         
+        <div class="row-group">
+          <select id="categorySelect"></select>
+          <select id="priceSelect">
+            <option value="$">$ (Cheap Eats)</option>
+            <option value="$$" selected>$$ (Sit-Down)</option>
+            <option value="$$$">$$$ (Fancy)</option>
+          </select>
+        </div>
+
         <label class="day-label">Open Days:</label>
         <div class="days-group">
           <label><input type="checkbox" value="Sun" class="day-input" checked> Sun</label>
