@@ -93,6 +93,15 @@ h3 { font-size: 0.95rem; margin-bottom: 10px; color: #00adb5; }
   flex-direction: column;
 }
 
+.row-group {
+  display: flex;
+  gap: 8px;
+}
+
+.row-group select {
+  flex: 1;
+}
+
 input, select {
   padding: 10px;
   border-radius: 6px;
@@ -152,7 +161,11 @@ li {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
-  margin-left: 8px;
+  margin-left: 4px;
+}
+
+.price-tag {
+  color: #81c784;
 }
 
 .delete-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
