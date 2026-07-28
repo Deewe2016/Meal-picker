@@ -1,199 +1,196 @@
-const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-// Default categories
-let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
-  "Cupertino", "Santa Clara", "Mountain View", "San Jose"
-];
-
-// Default restaurants with cuisine, price, and days
-let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
-  { name: "Tacos El Gordo", category: "San Jose", price: "$", cuisine: "Mexican", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "In-N-Out", category: "Santa Clara", price: "$", cuisine: "American", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "Ramen Nagi", category: "Cupertino", price: "$$", cuisine: "Asian", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
-];
-
-let lastWinner = localStorage.getItem('lastMealWinner') || "";
-
-// Initial Render
-renderCategories();
-renderList();
-
-function renderCategories() {
-  const checkboxContainer = document.getElementById('filterCheckboxes');
-  const selectDropdown = document.getElementById('categorySelect');
-
-  checkboxContainer.innerHTML = '';
-  selectDropdown.innerHTML = '';
-
-  categories.forEach((cat, index) => {
-    const label = document.createElement('label');
-    label.className = 'checkbox-label';
-    label.innerHTML = `
-      <input type="checkbox" value="${cat}" class="city-filter" checked>
-      ${cat}
-      <span class="delete-btn" onclick="removeCategory(${index})" title="Delete City">✕</span>
-    `;
-    checkboxContainer.appendChild(label);
-
-    const option = document.createElement('option');
-    option.value = cat;
-    option.textContent = cat;
-    selectDropdown.appendChild(option);
-  });
-
-  localStorage.setItem('mealCategories', JSON.stringify(categories));
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-function renderList() {
-  const listElement = document.getElementById('restaurantList');
-  listElement.innerHTML = '';
-
-  restaurants.forEach((item, index) => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <div>
-        <strong>${item.name}</strong>
-        <span class="tag price-tag">${item.price || "$$"}</span>
-        <span class="tag">${item.cuisine || "Other"}</span>
-        <span class="tag">${item.category}</span>
-      </div>
-      <span class="delete-btn" onclick="removeRestaurant(${index})">✕</span>
-    `;
-    listElement.appendChild(li);
-  });
-
-  localStorage.setItem('mealRestaurants', JSON.stringify(restaurants));
+body {
+  background-color: #121212;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-function addCategory() {
-  const input = document.getElementById('newCategoryInput');
-  const catName = input.value.trim();
+.card {
+  background-color: #1e1e1e;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 900px;
+}
 
-  if (catName !== "" && !categories.includes(catName)) {
-    categories.push(catName);
-    input.value = "";
-    renderCategories();
+.app-header {
+  text-align: center;
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 5px; }
+.subtitle { color: #aaa; font-size: 0.9rem; margin-bottom: 20px; }
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 700px) {
+  .grid-container {
+    grid-template-columns: 1fr;
   }
 }
 
-function removeCategory(index) {
-  const categoryToRemove = categories[index];
-  categories.splice(index, 1);
-  restaurants = restaurants.filter(item => item.category !== categoryToRemove);
-  renderCategories();
-  renderList();
+.column {
+  display: flex;
+  flex-direction: column;
 }
 
-function addRestaurant() {
-  const input = document.getElementById('restaurantInput');
-  const categorySelect = document.getElementById('categorySelect');
-  const priceSelect = document.getElementById('priceSelect');
-  const cuisineSelect = document.getElementById('cuisineSelect');
-  
-  const name = input.value.trim();
-  const category = categorySelect.value;
-  const price = priceSelect.value;
-  const cuisine = cuisineSelect.value;
-
-  const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
-                            .map(cb => cb.value);
-
-  if (name !== "" && category !== "" && selectedDays.length > 0) {
-    restaurants.push({ name: name, category: category, price: price, cuisine: cuisine, days: selectedDays });
-    input.value = "";
-    renderList();
-  }
+.result-box {
+  background-color: #2a2a2a;
+  border: 2px solid #ff5722;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-function removeRestaurant(index) {
-  restaurants.splice(index, 1);
-  renderList();
+#winner { color: #ff5722; font-size: 1.4rem; }
+
+#spinBtn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.2rem;
+  background-color: #ff5722;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
-function pickRestaurant() {
-  const todayIndex = new Date().getDay();
-  const todayName = dayNames[todayIndex];
+#spinBtn:hover { background-color: #e64a19; }
 
-  const checkedCities = Array.from(document.querySelectorAll('.city-filter:checked')).map(cb => cb.value);
-  const checkedPrices = Array.from(document.querySelectorAll('.price-filter:checked')).map(cb => cb.value);
-  const checkedCuisines = Array.from(document.querySelectorAll('.cuisine-filter:checked')).map(cb => cb.value);
-
-  if (checkedCities.length === 0 || checkedPrices.length === 0 || checkedCuisines.length === 0) {
-    document.getElementById('winner').textContent = "Select at least 1 city, price, and cuisine!";
-    return;
-  }
-
-  let filteredPool = restaurants.filter(item => {
-    const matchesCity = checkedCities.includes(item.category);
-    const matchesPrice = checkedPrices.includes(item.price || "$$");
-    const matchesCuisine = checkedCuisines.includes(item.cuisine || "Other");
-    const isOpenToday = item.days ? item.days.includes(todayName) : true; 
-    return matchesCity && matchesPrice && matchesCuisine && isOpenToday;
-  });
-
-  if (filteredPool.length === 0) {
-    document.getElementById('winner').textContent = `No matching places open on ${todayName}!`;
-    return;
-  }
-
-  if (filteredPool.length > 1 && lastWinner !== "") {
-    filteredPool = filteredPool.filter(item => item.name !== lastWinner);
-  }
-
-  const winnerDisplay = document.getElementById('winner');
-  let counter = 0;
-
-  const spinInterval = setInterval(() => {
-    const randomIndex = Math.floor(Math.random() * filteredPool.length);
-    winnerDisplay.textContent = filteredPool[randomIndex].name;
-    counter++;
-
-    if (counter > 15) {
-      clearInterval(spinInterval);
-      const finalWinner = filteredPool[Math.floor(Math.random() * filteredPool.length)];
-      
-      lastWinner = finalWinner.name;
-      localStorage.setItem('lastMealWinner', lastWinner);
-
-      winnerDisplay.textContent = `🎉 ${finalWinner.name} (${finalWinner.price}, ${finalWinner.category})!`;
-    }
-  }, 100);
+.section {
+  text-align: left;
+  margin-bottom: 15px;
+  background-color: #262626;
+  padding: 15px;
+  border-radius: 10px;
 }
 
-// 📲 SHARE / EXPORT FUNCTIONALITY
-function exportData() {
-  const package = {
-    categories: categories,
-    restaurants: restaurants
-  };
-  // Converts all data to a single text string
-  const encodedData = btoa(JSON.stringify(package));
-  
-  navigator.clipboard.writeText(encodedData);
-  alert("Family Share Code copied to clipboard! Text it to your parents!");
+h3 { font-size: 0.95rem; margin-bottom: 10px; color: #00adb5; }
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-// 📲 IMPORT FUNCTIONALITY
-function importData() {
-  const input = document.getElementById('importInput').value.trim();
-  if (!input) {
-    alert("Please paste a Share Code first!");
-    return;
-  }
-
-  try {
-    const decodedData = JSON.parse(atob(input));
-    if (decodedData.categories && decodedData.restaurants) {
-      categories = decodedData.categories;
-      restaurants = decodedData.restaurants;
-      
-      renderCategories();
-      renderList();
-      
-      document.getElementById('importInput').value = "";
-      alert("Restaurant list updated successfully!");
-    }
-  } catch (e) {
-    alert("Invalid Share Code! Make sure you copied the exact code.");
-  }
+.checkbox-label {
+  background: #333;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.row-group {
+  display: flex;
+  gap: 8px;
+}
+
+.row-group select {
+  flex: 1;
+}
+
+input, select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #1a1a1a;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.day-label {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-top: 5px;
+}
+
+.days-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.days-group label {
+  background: #1a1a1a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button {
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: #00adb5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+li {
+  background-color: #1a1a1a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.tag {
+  background-color: #333;
+  color: #ffb74d;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+.price-tag {
+  color: #81c784;
+}
+
+.delete-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
