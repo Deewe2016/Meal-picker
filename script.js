@@ -5,7 +5,12 @@ let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
   "Cupertino", "Santa Clara", "Mountain View", "San Jose"
 ];
 
-// Default restaurants with cuisine, price, and days
+// Default cuisines
+let cuisines = JSON.parse(localStorage.getItem('mealCuisines')) || [
+  "Mexican", "Asian", "American", "Italian"
+];
+
+// Default restaurants
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
   { name: "Tacos El Gordo", category: "San Jose", price: "$", cuisine: "Mexican", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
   { name: "In-N-Out", category: "Santa Clara", price: "$", cuisine: "American", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
@@ -16,8 +21,10 @@ let lastWinner = localStorage.getItem('lastMealWinner') || "";
 
 // Initial Render
 renderCategories();
+renderCuisines();
 renderList();
 
+// Render City Categories
 function renderCategories() {
   const checkboxContainer = document.getElementById('filterCheckboxes');
   const selectDropdown = document.getElementById('categorySelect');
@@ -44,6 +51,35 @@ function renderCategories() {
   localStorage.setItem('mealCategories', JSON.stringify(categories));
 }
 
+// Render Cuisines Dynamically
+function renderCuisines() {
+  const checkboxContainer = document.getElementById('cuisineCheckboxes');
+  const selectDropdown = document.getElementById('cuisineSelect');
+
+  checkboxContainer.innerHTML = '';
+  selectDropdown.innerHTML = '';
+
+  cuisines.forEach((cui, index) => {
+    // 1. Build Filter Checkbox with Delete (✕)
+    const label = document.createElement('label');
+    label.className = 'checkbox-label';
+    label.innerHTML = `
+      <input type="checkbox" value="${cui}" class="cuisine-filter" checked>
+      ${cui}
+      <span class="delete-btn" onclick="removeCuisine(${index})" title="Delete Cuisine">✕</span>
+    `;
+    checkboxContainer.appendChild(label);
+
+    // 2. Build Dropdown Option for Adding Places
+    const option = document.createElement('option');
+    option.value = cui;
+    option.textContent = cui;
+    selectDropdown.appendChild(option);
+  });
+
+  localStorage.setItem('mealCuisines', JSON.stringify(cuisines));
+}
+
 function renderList() {
   const listElement = document.getElementById('restaurantList');
   listElement.innerHTML = '';
@@ -65,6 +101,7 @@ function renderList() {
   localStorage.setItem('mealRestaurants', JSON.stringify(restaurants));
 }
 
+// Add/Remove Cities
 function addCategory() {
   const input = document.getElementById('newCategoryInput');
   const catName = input.value.trim();
@@ -84,6 +121,27 @@ function removeCategory(index) {
   renderList();
 }
 
+// Add/Remove Cuisines
+function addCuisine() {
+  const input = document.getElementById('newCuisineInput');
+  const cuiName = input.value.trim();
+
+  if (cuiName !== "" && !cuisines.includes(cuiName)) {
+    cuisines.push(cuiName);
+    input.value = "";
+    renderCuisines();
+  }
+}
+
+function removeCuisine(index) {
+  const cuisineToRemove = cuisines[index];
+  cuisines.splice(index, 1);
+  restaurants = restaurants.filter(item => item.cuisine !== cuisineToRemove);
+  renderCuisines();
+  renderList();
+}
+
+// Add Restaurant
 function addRestaurant() {
   const input = document.getElementById('restaurantInput');
   const categorySelect = document.getElementById('categorySelect');
@@ -98,7 +156,7 @@ function addRestaurant() {
   const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
                             .map(cb => cb.value);
 
-  if (name !== "" && category !== "" && selectedDays.length > 0) {
+  if (name !== "" && category !== "" && cuisine !== "" && selectedDays.length > 0) {
     restaurants.push({ name: name, category: category, price: price, cuisine: cuisine, days: selectedDays });
     input.value = "";
     renderList();
@@ -110,6 +168,7 @@ function removeRestaurant(index) {
   renderList();
 }
 
+// Spin Algorithm
 function pickRestaurant() {
   const todayIndex = new Date().getDay();
   const todayName = dayNames[todayIndex];
@@ -126,7 +185,7 @@ function pickRestaurant() {
   let filteredPool = restaurants.filter(item => {
     const matchesCity = checkedCities.includes(item.category);
     const matchesPrice = checkedPrices.includes(item.price || "$$");
-    const matchesCuisine = checkedCuisines.includes(item.cuisine || "Other");
+    const matchesCuisine = checkedCuisines.includes(item.cuisine);
     const isOpenToday = item.days ? item.days.includes(todayName) : true; 
     return matchesCity && matchesPrice && matchesCuisine && isOpenToday;
   });
@@ -160,20 +219,18 @@ function pickRestaurant() {
   }, 100);
 }
 
-// 📲 SHARE / EXPORT FUNCTIONALITY
+// Share/Import Data
 function exportData() {
   const package = {
     categories: categories,
+    cuisines: cuisines,
     restaurants: restaurants
   };
-  // Converts all data to a single text string
   const encodedData = btoa(JSON.stringify(package));
-  
   navigator.clipboard.writeText(encodedData);
   alert("Family Share Code copied to clipboard! Text it to your parents!");
 }
 
-// 📲 IMPORT FUNCTIONALITY
 function importData() {
   const input = document.getElementById('importInput').value.trim();
   if (!input) {
@@ -183,11 +240,13 @@ function importData() {
 
   try {
     const decodedData = JSON.parse(atob(input));
-    if (decodedData.categories && decodedData.restaurants) {
+    if (decodedData.categories && decodedData.cuisines && decodedData.restaurants) {
       categories = decodedData.categories;
+      cuisines = decodedData.cuisines;
       restaurants = decodedData.restaurants;
       
       renderCategories();
+      renderCuisines();
       renderList();
       
       document.getElementById('importInput').value = "";
