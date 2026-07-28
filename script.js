@@ -1,20 +1,22 @@
+// Days map helper
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 // Default categories
 let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
   "Cupertino", "Santa Clara", "Mountain View", "San Jose"
 ];
 
-// Default restaurants with assigned categories
+// Default restaurants with assigned categories and open days
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
-  { name: "Tacos El Gordo", category: "San Jose" },
-  { name: "In-N-Out", category: "Santa Clara" },
-  { name: "Ramen Nagi", category: "Cupertino" }
+  { name: "Tacos El Gordo", category: "San Jose", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "In-N-Out", category: "Santa Clara", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "Ramen Nagi", category: "Cupertino", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
 ];
 
 // Initial Render
 renderCategories();
 renderList();
 
-// Display category checkboxes & dropdown choices
 function renderCategories() {
   const checkboxContainer = document.getElementById('filterCheckboxes');
   const selectDropdown = document.getElementById('categorySelect');
@@ -23,7 +25,6 @@ function renderCategories() {
   selectDropdown.innerHTML = '';
 
   categories.forEach((cat, index) => {
-    // 1. Build Filter Checkboxes with a Delete (✕) Button
     const label = document.createElement('label');
     label.className = 'checkbox-label';
     label.innerHTML = `
@@ -33,7 +34,6 @@ function renderCategories() {
     `;
     checkboxContainer.appendChild(label);
 
-    // 2. Build Dropdown Options for adding restaurants
     const option = document.createElement('option');
     option.value = cat;
     option.textContent = cat;
@@ -43,7 +43,6 @@ function renderCategories() {
   localStorage.setItem('mealCategories', JSON.stringify(categories));
 }
 
-// Render the restaurant list on screen
 function renderList() {
   const listElement = document.getElementById('restaurantList');
   listElement.innerHTML = '';
@@ -63,7 +62,6 @@ function renderList() {
   localStorage.setItem('mealRestaurants', JSON.stringify(restaurants));
 }
 
-// Add a new custom category/city
 function addCategory() {
   const input = document.getElementById('newCategoryInput');
   const catName = input.value.trim();
@@ -75,61 +73,64 @@ function addCategory() {
   }
 }
 
-// NEW: Delete a category/city
 function removeCategory(index) {
   const categoryToRemove = categories[index];
-  
-  // Remove the category from the categories array
   categories.splice(index, 1);
-  
-  // Also remove any restaurants associated with this deleted city
   restaurants = restaurants.filter(item => item.category !== categoryToRemove);
-  
-  // Re-render the categories and restaurant list
   renderCategories();
   renderList();
 }
 
-// Add a restaurant assigned to selected category
 function addRestaurant() {
   const input = document.getElementById('restaurantInput');
   const select = document.getElementById('categorySelect');
   const name = input.value.trim();
   const category = select.value;
 
-  if (name !== "" && category !== "") {
-    restaurants.push({ name: name, category: category });
+  // Get selected open days
+  const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
+                            .map(cb => cb.value);
+
+  if (name !== "" && category !== "" && selectedDays.length > 0) {
+    restaurants.push({ name: name, category: category, days: selectedDays });
     input.value = "";
     renderList();
   }
 }
 
-// Delete a restaurant
 function removeRestaurant(index) {
   restaurants.splice(index, 1);
   renderList();
 }
 
-// Pick from selected categories only
 function pickRestaurant() {
-  // Find which checkboxes are currently checked
-  const checkedBoxes = Array.from(document.querySelectorAll('.city-filter:checked'))
+  // 1. Get today's day string (e.g., "Mon", "Tue")
+  const todayIndex = new Date().getDay();
+  const todayName = dayNames[todayIndex];
+
+  // 2. Find which city checkboxes are currently checked
+  const checkedCities = Array.from(document.querySelectorAll('.city-filter:checked'))
                             .map(cb => cb.value);
 
-  if (checkedBoxes.length === 0) {
+  if (checkedCities.length === 0) {
     document.getElementById('winner').textContent = "Select at least 1 city!";
     return;
   }
 
-  // Filter pool down to matching cities
-  const filteredPool = restaurants.filter(item => checkedBoxes.includes(item.category));
+  // 3. Filter pool by city AND check if open today!
+  const filteredPool = restaurants.filter(item => {
+    const matchesCity = checkedCities.includes(item.category);
+    // If old items don't have days array yet, default to open
+    const isOpenToday = item.days ? item.days.includes(todayName) : true; 
+    return matchesCity && isOpenToday;
+  });
 
   if (filteredPool.length === 0) {
-    document.getElementById('winner').textContent = "No places in selected cities!";
+    document.getElementById('winner').textContent = `No places open on ${todayName} in selected cities!`;
     return;
   }
 
-  // Spin animation among filtered pool
+  // 4. Spin animation
   const winnerDisplay = document.getElementById('winner');
   let counter = 0;
 
