@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Dinner Spinner</title>
+  <title>Meal Picker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="card">
-    <h1>🍽️ What Are We Eating?</h1>
-    <p class="subtitle">No more arguing. Let code decide.</p>
+    <h1>🍽️ Meal Picker</h1>
+    <p class="subtitle">Filter by city & let code decide!</p>
 
     <div class="result-box">
       <h2 id="winner">Press the button!</h2>
@@ -18,13 +18,32 @@
 
     <button id="spinBtn" onclick="pickRestaurant()">Pick For Us!</button>
 
-    <div class="input-container">
-      <input type="text" id="restaurantInput" placeholder="Add a place (e.g., Tacos)...">
-      <button onclick="addRestaurant()">Add</button>
+    <div class="section">
+      <h3>1. Select Cities to Include:</h3>
+      <div id="filterCheckboxes" class="checkbox-group"></div>
     </div>
 
-    <h3>Your Restaurant Pool:</h3>
-    <ul id="restaurantList"></ul>
+    <div class="section">
+      <h3>Add a New City/Category:</h3>
+      <div class="input-container">
+        <input type="text" id="newCategoryInput" placeholder="New city (e.g., Sunnyvale)">
+        <button onclick="addCategory()">Add City</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Add a Restaurant:</h3>
+      <div class="input-container flex-column">
+        <input type="text" id="restaurantInput" placeholder="Restaurant name...">
+        <select id="categorySelect"></select>
+        <button onclick="addRestaurant()">Add Restaurant</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Your Restaurant Pool:</h3>
+      <ul id="restaurantList"></ul>
+    </div>
   </div>
 
   <script src="script.js"></script>
