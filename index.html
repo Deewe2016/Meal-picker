@@ -61,7 +61,7 @@
         </div>
 
         <div class="section">
-          <h3>Add a Restaurant:</h3>
+          <h3 id="formTitle">Add a Restaurant:</h3>
           <div class="input-container flex-column">
             <input type="text" id="restaurantInput" placeholder="Restaurant name...">
             
@@ -86,7 +86,10 @@
               <label><input type="checkbox" value="Sat" class="day-input" checked> Sat</label>
             </div>
 
-            <button onclick="addRestaurant()">Add Restaurant</button>
+            <div class="row-group">
+              <button id="saveBtn" onclick="saveRestaurant()">Add Restaurant</button>
+              <button id="cancelBtn" onclick="cancelEdit()" style="background-color: #777; display: none;">Cancel</button>
+            </div>
           </div>
         </div>
 
