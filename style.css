@@ -201,3 +201,10 @@ li {
 }
 
 .delete-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+.margin-top {
+  margin-top: 8px;
+}
+
+.rating-tag {
+  color: #ffd700;
+}
