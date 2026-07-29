@@ -18,13 +18,13 @@ let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
 ];
 
 let lastWinner = localStorage.getItem('lastMealWinner') || "";
+let editIndex = -1; // -1 means we are adding a NEW restaurant. Otherwise, it holds the index of what we are editing!
 
 // Initial Render
 renderCategories();
 renderCuisines();
 renderList();
 
-// Render City Categories
 function renderCategories() {
   const checkboxContainer = document.getElementById('filterCheckboxes');
   const selectDropdown = document.getElementById('categorySelect');
@@ -51,7 +51,6 @@ function renderCategories() {
   localStorage.setItem('mealCategories', JSON.stringify(categories));
 }
 
-// Render Cuisines Dynamically
 function renderCuisines() {
   const checkboxContainer = document.getElementById('cuisineCheckboxes');
   const selectDropdown = document.getElementById('cuisineSelect');
@@ -60,7 +59,6 @@ function renderCuisines() {
   selectDropdown.innerHTML = '';
 
   cuisines.forEach((cui, index) => {
-    // 1. Build Filter Checkbox with Delete (✕)
     const label = document.createElement('label');
     label.className = 'checkbox-label';
     label.innerHTML = `
@@ -70,7 +68,6 @@ function renderCuisines() {
     `;
     checkboxContainer.appendChild(label);
 
-    // 2. Build Dropdown Option for Adding Places
     const option = document.createElement('option');
     option.value = cui;
     option.textContent = cui;
@@ -93,7 +90,10 @@ function renderList() {
         <span class="tag">${item.cuisine || "Other"}</span>
         <span class="tag">${item.category}</span>
       </div>
-      <span class="delete-btn" onclick="removeRestaurant(${index})">✕</span>
+      <div>
+        <span class="edit-btn" onclick="startEdit(${index})" title="Edit Restaurant">✏️</span>
+        <span class="delete-btn" onclick="removeRestaurant(${index})" title="Delete Restaurant">✕</span>
+      </div>
     `;
     listElement.appendChild(li);
   });
@@ -101,7 +101,6 @@ function renderList() {
   localStorage.setItem('mealRestaurants', JSON.stringify(restaurants));
 }
 
-// Add/Remove Cities
 function addCategory() {
   const input = document.getElementById('newCategoryInput');
   const catName = input.value.trim();
@@ -121,7 +120,6 @@ function removeCategory(index) {
   renderList();
 }
 
-// Add/Remove Cuisines
 function addCuisine() {
   const input = document.getElementById('newCuisineInput');
   const cuiName = input.value.trim();
@@ -141,8 +139,30 @@ function removeCuisine(index) {
   renderList();
 }
 
-// Add Restaurant
-function addRestaurant() {
+// ✏️ START EDITING: Fills input controls with selected restaurant data
+function startEdit(index) {
+  editIndex = index;
+  const item = restaurants[index];
+
+  document.getElementById('restaurantInput').value = item.name;
+  document.getElementById('categorySelect').value = item.category;
+  document.getElementById('priceSelect').value = item.price || "$$";
+  document.getElementById('cuisineSelect').value = item.cuisine || "Other";
+
+  // Check the correct day checkboxes
+  const dayInputs = document.querySelectorAll('.day-input');
+  dayInputs.forEach(cb => {
+    cb.checked = item.days ? item.days.includes(cb.value) : true;
+  });
+
+  // Change UI text to show Edit Mode
+  document.getElementById('formTitle').textContent = "Edit Restaurant:";
+  document.getElementById('saveBtn').textContent = "Save Changes";
+  document.getElementById('cancelBtn').style.display = "block";
+}
+
+// 💾 SAVE RESTAURANT: Handles both ADDING and EDITING
+function saveRestaurant() {
   const input = document.getElementById('restaurantInput');
   const categorySelect = document.getElementById('categorySelect');
   const priceSelect = document.getElementById('priceSelect');
@@ -157,14 +177,41 @@ function addRestaurant() {
                             .map(cb => cb.value);
 
   if (name !== "" && category !== "" && cuisine !== "" && selectedDays.length > 0) {
-    restaurants.push({ name: name, category: category, price: price, cuisine: cuisine, days: selectedDays });
-    input.value = "";
+    const updatedData = { name, category, price, cuisine, days: selectedDays };
+
+    if (editIndex === -1) {
+      // Add New
+      restaurants.push(updatedData);
+    } else {
+      // Update Existing
+      restaurants[editIndex] = updatedData;
+    }
+
+    resetForm();
     renderList();
   }
 }
 
+function cancelEdit() {
+  resetForm();
+}
+
+function resetForm() {
+  editIndex = -1;
+  document.getElementById('restaurantInput').value = "";
+  document.getElementById('formTitle').textContent = "Add a Restaurant:";
+  document.getElementById('saveBtn').textContent = "Add Restaurant";
+  document.getElementById('cancelBtn').style.display = "none";
+
+  // Reset checkboxes back to checked
+  document.querySelectorAll('.day-input').forEach(cb => cb.checked = true);
+}
+
 function removeRestaurant(index) {
   restaurants.splice(index, 1);
+  if (editIndex === index) {
+    resetForm();
+  }
   renderList();
 }
 
