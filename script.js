@@ -1,26 +1,22 @@
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Default categories
 let categories = JSON.parse(localStorage.getItem('mealCategories')) || [
   "Cupertino", "Santa Clara", "Mountain View", "San Jose"
 ];
 
-// Default cuisines
 let cuisines = JSON.parse(localStorage.getItem('mealCuisines')) || [
   "Mexican", "Asian", "American", "Italian"
 ];
 
-// Default restaurants
 let restaurants = JSON.parse(localStorage.getItem('mealRestaurants')) || [
-  { name: "Tacos El Gordo", category: "San Jose", price: "$", cuisine: "Mexican", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "In-N-Out", category: "Santa Clara", price: "$", cuisine: "American", days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
-  { name: "Ramen Nagi", category: "Cupertino", price: "$$", cuisine: "Asian", days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+  { name: "Tacos El Gordo", category: "San Jose", price: "$", cuisine: "Mexican", rating: 4, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "In-N-Out", category: "Santa Clara", price: "$", cuisine: "American", rating: 3, days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] },
+  { name: "Ramen Nagi", category: "Cupertino", price: "$$", cuisine: "Asian", rating: 4, days: ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
 ];
 
 let lastWinner = localStorage.getItem('lastMealWinner') || "";
-let editIndex = -1; // -1 means we are adding a NEW restaurant. Otherwise, it holds the index of what we are editing!
+let editIndex = -1;
 
-// Initial Render
 renderCategories();
 renderCuisines();
 renderList();
@@ -82,10 +78,12 @@ function renderList() {
   listElement.innerHTML = '';
 
   restaurants.forEach((item, index) => {
+    const stars = "⭐".repeat(item.rating || 3);
     const li = document.createElement('li');
     li.innerHTML = `
       <div>
         <strong>${item.name}</strong>
+        <span class="tag rating-tag">${stars}</span>
         <span class="tag price-tag">${item.price || "$$"}</span>
         <span class="tag">${item.cuisine || "Other"}</span>
         <span class="tag">${item.category}</span>
@@ -139,7 +137,6 @@ function removeCuisine(index) {
   renderList();
 }
 
-// ✏️ START EDITING: Fills input controls with selected restaurant data
 function startEdit(index) {
   editIndex = index;
   const item = restaurants[index];
@@ -148,42 +145,40 @@ function startEdit(index) {
   document.getElementById('categorySelect').value = item.category;
   document.getElementById('priceSelect').value = item.price || "$$";
   document.getElementById('cuisineSelect').value = item.cuisine || "Other";
+  document.getElementById('ratingSelect').value = item.rating || 3;
 
-  // Check the correct day checkboxes
   const dayInputs = document.querySelectorAll('.day-input');
   dayInputs.forEach(cb => {
     cb.checked = item.days ? item.days.includes(cb.value) : true;
   });
 
-  // Change UI text to show Edit Mode
   document.getElementById('formTitle').textContent = "Edit Restaurant:";
   document.getElementById('saveBtn').textContent = "Save Changes";
   document.getElementById('cancelBtn').style.display = "block";
 }
 
-// 💾 SAVE RESTAURANT: Handles both ADDING and EDITING
 function saveRestaurant() {
   const input = document.getElementById('restaurantInput');
   const categorySelect = document.getElementById('categorySelect');
   const priceSelect = document.getElementById('priceSelect');
   const cuisineSelect = document.getElementById('cuisineSelect');
+  const ratingSelect = document.getElementById('ratingSelect');
   
   const name = input.value.trim();
   const category = categorySelect.value;
   const price = priceSelect.value;
   const cuisine = cuisineSelect.value;
+  const rating = parseInt(ratingSelect.value);
 
   const selectedDays = Array.from(document.querySelectorAll('.day-input:checked'))
                             .map(cb => cb.value);
 
   if (name !== "" && category !== "" && cuisine !== "" && selectedDays.length > 0) {
-    const updatedData = { name, category, price, cuisine, days: selectedDays };
+    const updatedData = { name, category, price, cuisine, rating, days: selectedDays };
 
     if (editIndex === -1) {
-      // Add New
       restaurants.push(updatedData);
     } else {
-      // Update Existing
       restaurants[editIndex] = updatedData;
     }
 
@@ -202,8 +197,8 @@ function resetForm() {
   document.getElementById('formTitle').textContent = "Add a Restaurant:";
   document.getElementById('saveBtn').textContent = "Add Restaurant";
   document.getElementById('cancelBtn').style.display = "none";
+  document.getElementById('ratingSelect').value = "3";
 
-  // Reset checkboxes back to checked
   document.querySelectorAll('.day-input').forEach(cb => cb.checked = true);
 }
 
@@ -215,7 +210,7 @@ function removeRestaurant(index) {
   renderList();
 }
 
-// Spin Algorithm
+// 🎲 PRIORITY WEIGHTED SPIN ALGORITHM
 function pickRestaurant() {
   const todayIndex = new Date().getDay();
   const todayName = dayNames[todayIndex];
@@ -229,6 +224,7 @@ function pickRestaurant() {
     return;
   }
 
+  // 1. Filter matching open places
   let filteredPool = restaurants.filter(item => {
     const matchesCity = checkedCities.includes(item.category);
     const matchesPrice = checkedPrices.includes(item.price || "$$");
@@ -246,6 +242,15 @@ function pickRestaurant() {
     filteredPool = filteredPool.filter(item => item.name !== lastWinner);
   }
 
+  // 2. Build weighted pool (Ticket System)
+  let weightedTickets = [];
+  filteredPool.forEach(item => {
+    const tickets = item.rating || 3;
+    for (let i = 0; i < tickets; i++) {
+      weightedTickets.push(item);
+    }
+  });
+
   const winnerDisplay = document.getElementById('winner');
   let counter = 0;
 
@@ -256,7 +261,8 @@ function pickRestaurant() {
 
     if (counter > 15) {
       clearInterval(spinInterval);
-      const finalWinner = filteredPool[Math.floor(Math.random() * filteredPool.length)];
+      // Pick from weighted tickets!
+      const finalWinner = weightedTickets[Math.floor(Math.random() * weightedTickets.length)];
       
       lastWinner = finalWinner.name;
       localStorage.setItem('lastMealWinner', lastWinner);
