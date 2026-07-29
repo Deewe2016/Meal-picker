@@ -194,3 +194,10 @@ li {
 }
 
 .delete-btn { color: #ff4d4d; cursor: pointer; font-weight: bold; }
+/* Add this snippet to the bottom of style.css */
+.edit-btn {
+  color: #ffb74d;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 8px;
+}
